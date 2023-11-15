@@ -17,12 +17,13 @@ Content-type: application/json
 
 
 ###
-DELETE http://localhost:4000/delete/2
+DELETE http://localhost:4000/delete/3
 
 
 ###
-PATCH http://localhost:4000/articles/1
-
- {
-    "title": "example"
- }
+PATCH http://localhost:4000/articles/3
+Content-type: application/json
+  
+{
+     "title": "exampleee"
+}
