@@ -1,4 +1,6 @@
 import express from 'express';
+import sqlite3 from 'sqlite3';
+const db = new sqlite3.Database('good_corner.sqlite');
 import { v4 as uuidv4 } from 'uuid';
 
 
@@ -28,9 +30,27 @@ let articles = [
 
  app.get("/articles", (req, res) => {
     
-     console.log("tell me something");
+    // db.all("SELECT * FROM ad", (err, rows) => {
+    //     if (err) {
+    //         console.error(err.message);
+    //         res.status(500).send("Error occurred");
+    //         return;
+    //     }
+    //     res.send(rows);
+    // });
+    db.all("SELECT * FROM ad", (err, rows) => {
+            if (err) {
+                console.error(err.message);
+                res.status(500).send("Error occurred");
+                return;
+            }
+            res.send(rows);
+        });
 
-     res.send(articles);
+
+    //  console.log("tell me something");
+
+    //  res.send(articles);
  });
 
 //  create route insert article

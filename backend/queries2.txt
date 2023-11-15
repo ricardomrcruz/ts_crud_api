@@ -1,0 +1,34 @@
+-- SQLite
+CREATE TABLE ad 
+(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title VARCHAR(100) NOT NULL,
+    description TEXT,
+    author VARCHAR(100) NOT NULL,
+    price INT, 
+    createdAt DATE,
+    picture VARCHAR(100),
+    location VARCHAR(100)
+);
+
+INSERT INTO ad (title, description, author, price, createdAt, picture, location) VALUES 
+('Chemise Polo', 'Neuf, jamais porté, taille M', 'marie@leblanc.fr', 25, '2023-11-10', 'https://image.fr/chemise.jpg', 'Lyon'),
+('Vélo de ville', 'Bon état, peu servi', 'pierre@moreau.fr', 150, '2023-11-09', 'https://image.fr/velo.jpg', 'Paris'),
+('Lampe design', 'Lampe moderne en très bon état', 'luc@bernard.fr', 40, '2023-11-08', 'https://image.fr/lampe.jpg', 'Bordeaux'),
+('Sac à main en cuir', 'Sac de marque, utilisé mais en bon état', 'sophie@martin.fr', 70, '2023-11-07', 'https://image.fr/sac.jpg', 'Lyon'),
+('Guitare acoustique', 'Très peu utilisée, comme neuve', 'olivier@petit.fr', 120, '2023-11-06', 'https://image.fr/guitare.jpg', 'Paris'),
+('Smartphone dernier cri', 'En parfait état, avec garantie', 'claire@roux.fr', 300, '2023-11-05', 'https://image.fr/smartphone.jpg', 'Bordeaux'),
+('Chaussures de randonnée', 'Taille 42, état neuf', 'jean@lefebvre.fr', 50, '2023-11-04', 'https://image.fr/chaussures.jpg', 'Lyon'),
+('Ordinateur portable', 'Modèle récent, parfait pour le gaming', 'emilie@richard.fr', 800, '2023-11-03', 'https://image.fr/ordinateur.jpg', 'Paris'),
+('Appareil photo reflex', 'Idéal pour les amateurs de photographie', 'francois@simon.fr', 350, '2023-11-02', 'https://image.fr/camera.jpg', 'Bordeaux'),
+('Casque audio', 'Haute qualité sonore, presque neuf', 'laura@dupuis.fr', 60, '2023-11-01', 'https://image.fr/casque.jpg', 'Lyon'),
+('Montre connectée', 'Fonctions sportives, très bon état', 'julien@blanc.fr', 90, '2023-10-31', 'https://image.fr/montre.jpg', 'Paris'),
+('Table en bois massif', 'Belle table robuste pour salle à manger', 'anne@leroy.fr', 200, '2023-10-30', 'https://image.fr/table.jpg', 'Bordeaux'),
+('Console de jeux dernière génération', 'Peu utilisée, avec jeux', 'nicolas@morin.fr', 400, '2023-10-29', 'https://image.fr/console.jpg', 'Lyon'),
+('Trottinette électrique', 'Bonne autonomie, idéale pour la ville', 'isabelle@nguyen.fr', 250, '2023-10-28', 'https://image.fr/trottinette.jpg', 'Paris'),
+('Livre de cuisine', 'Recettes traditionnelles françaises', 'remy@robin.fr', 15, '2023-10-27', 'https://image.fr/livre.jpg', 'Bordeaux'),
+('Cafetière expresso', 'Machine à café de marque, très peu servie', 'helene@rey.fr', 80, '2023-10-26', 'https://image.fr/cafetiere.jpg', 'Lyon'),
+('Téléviseur 4K', 'Grand écran, haute définition', 'alex@fournier.fr', 550, '2023-10-25', 'https://image.fr/tv.jpg', 'Paris'),
+('Veste en cuir', 'Style motard, taille L', 'valerie@gaillard.fr', 100, '2023-10-24', 'https://image.fr/veste.jpg', 'Bordeaux'),
+('Planche de surf', 'Parfait état, idéale pour débutants', 'david@roussel.fr', 180, '2023-10-23', 'https://image.fr/surf.jpg', 'Lyon'),
+('Enceinte Bluetooth', 'Son de haute qualité, portable', 'caroline@fabre.fr', 110, '2023-10-22', 'https://image.fr/enceinte.jpg', 'Paris');
