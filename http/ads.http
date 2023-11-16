@@ -8,8 +8,8 @@ POST http://localhost:4000/ads/
 Content-type: application/json
  
  {
-      "id": "534",
-    "title": "dfdf", 
+      "id": "1",
+    "title": "puppy", 
     "author": "dfdff", 
     "description": "tehsfdhgnbhfghd",
     "price": 45,
@@ -21,7 +21,7 @@ Content-type: application/json
 
 
 ###
-DELETE http://localhost:4000/delete/3
+DELETE http://localhost:4000/delete/1
 
 
 ###

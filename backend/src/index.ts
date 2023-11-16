@@ -105,8 +105,11 @@ app.put('/ads/:id', async (req: Request, res:Response) => {
 
 // DELETE AD
 
-app.delete('/delete/:id', (req: Request, res: Response) => {
+app.delete('/delete/:id', async (req: Request, res: Response) => {
     
+  const id = parseInt(req.params.id);
+  await Ad.delete({ id });
+  res.send('OK');
   
   
   
