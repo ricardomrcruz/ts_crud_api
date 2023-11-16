@@ -1,18 +1,24 @@
-GET http://localhost:4000/articles/
+GET http://localhost:4000/ads/
 
 
 
 ###
 
-POST http://localhost:4000/articles/
+POST http://localhost:4000/ads/
 Content-type: application/json
  
  {
+      "id": "534",
     "title": "dfdf", 
-    "subtitle": "dfdff", 
-    "intro": "dfdfd" 
+    "author": "dfdff", 
+    "description": "tehsfdhgnbhfghd",
+    "price": 45,
+    "createdAt": "",
+   "location": "tehsbldsdsd",
+   "id_category": 1
+
  }
- 
+
 
 ###
 DELETE http://localhost:4000/delete/3
@@ -25,3 +31,19 @@ Content-type: application/json
 {
      "title": "exampleee"
 }
+
+###
+PUT http://localhost:4000/ads/44
+Content-type: application/json
+  
+{
+      "id": "56",
+    "title": "dfdf", 
+    "author": "dfdff", 
+    "description": "tehsfdhgnbhfghd",
+    "price": 34,
+    "createdAt": "",
+   "location": "tehsbldsdsd",
+   "id_category": 1
+
+ }
