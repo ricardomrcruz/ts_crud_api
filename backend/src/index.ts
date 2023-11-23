@@ -1,13 +1,21 @@
 import "reflect-metadata";
 import express, {Request, Response} from 'express';
+import cors from 'cors';
+import { validate } from "class-validator";
 import sqlite3 from 'sqlite3';
 import  Ad  from './entities/Ad';
+import  Tag  from './entities/Tag';
+import  Category  from './entities/Category';
 import  dataSource  from "./config/db";
+import { In, Like } from "typeorm";
 
 
-const db = new sqlite3.Database('good_corner.sqlite');
+const db = new sqlite3.Database('the_good_corner.sqlite');
 
 const app = express();
+
+app.use(cors());
+app.use(express.json());
 const PORT = 4000;
 
 app.use(express.json());
@@ -20,69 +28,129 @@ app.get("/", (req: Request, res: Response) => {
   
   });
 
+  app.get("/tags", async (req: Request, res: Response) => {
+    try {
+      const { name } = req.query;
+      const tags = await Tag.find({
+        where: { name: name ? Like(`%${name}%`) : undefined },
+      });
+      res.send(tags);
+    } catch (err) {
+      console.log(err);
+      res.sendStatus(500);
+    }
+  });
+
 // get route all articles
 
- app.get("/ads", async (req: Request, res: Response) => {
-  
-  const ads = await Ad.find();
-  res.send(ads);
+app.get("/ads", async (req: Request, res: Response) => {
+  const { tagIds, categoryId } = req.query;
+  const tIds =
+    typeof tagIds === "string" && tagIds.length > 0
+      ? tagIds.split(",").map((t) => parseInt(t, 10))
+      : undefined;
 
-  
-        // db.all("SELECT * FROM ad2", (err, rows:[Ad]) => {
-        //         if (!err) return res.send(rows);
-        //         console.log(err);
-        //         res.sendStatus(500);
-        // });
-    //  console.log("tell me something");
-    //  res.send(articles);
- });
+  const catId =
+    typeof categoryId === "string" && categoryId.length > 0
+      ? parseInt(categoryId, 10)
+      : undefined;
+
+  try {
+    const ads = await Ad.find({
+      relations: {
+        category: true,
+        tags: true,
+      },
+      where: {
+        tags: {
+          id: tIds ? In(tIds) : undefined,
+        },
+        category: {
+          id: catId,
+        },
+      },
+    });
+    res.send(ads);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+});
+
+app.get("/categories", async (req: Request, res: Response) => {
+  const { name } = req.query;
+
+  try {
+    const categories = await Category.find({
+      relations: {
+        ads: true,
+      },
+      where: { name: name ? Like(`%${name}%`) : undefined },
+    });
+    res.send(categories);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+});
+ 
+app.post("/categories", async (req: Request, res: Response) => {
+  try {
+    const newCategory = Category.create(req.body);
+    const errors = await validate(newCategory);
+    if (errors.length > 0) return res.status(422).send({ errors });
+    const newCategoryWithId = await newCategory.save();
+    res.send(newCategoryWithId);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+});
+
+app.post("/tags", async (req: Request, res: Response) => {
+  try {
+    const newTag = Tag.create(req.body);
+    const errors = await validate(newTag);
+    if (errors.length > 0) return res.status(422).send({ errors });
+    const newTagWithId = await newTag.save();
+    res.send(newTagWithId);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+});
 
 //  create route insert article
 
-app.post('/ads', (req: Request, res: Response) => {
+app.post("/ads", async (req: Request, res: Response) => {
+  try {
+    /*
+      const newAd = new Ad()
+      newAd.title = req.body.title
+      newAd.price = req.body.price
+      ...
+      const newAdWithId = await newAd.save();
+    */
+    const newAd = Ad.create(req.body);
+    const errors = await validate(newAd);
+    if (errors.length > 0) return res.status(422).send({ errors });
+    const newAdWithId = await newAd.save();
+    res.send(newAdWithId);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+});
 
-    const ad = new Ad();
-    ad.id = req.body.id;
-    ad.title = req.body.title;  
-    ad.description = req.body.description;  
-    ad.author = req.body.author;  
-    ad.price = req.body.price;  
-    ad.createdAt = req.body.createdAt;  
-    ad.location = req.body.location;  
-    ad.id_category = req.body.id_category;  
-  
-    ad.save();
-    res.send(ad);
-  
-  
-  
-  // console.log(req.body);
+app.post('/addcategory', (req: Request, res: Response) => {
+
+    const category = new Category();
+    // category.id_category = req.body.id_category;
+    category.name = req.body.name;  
     
-    // const newAd: Ad = {
-    //     ...req.body,
-    //     createdAt: new Date().toISOString(),
-    // };
-
-    // db.run(
-    //     "INSERT INTO ad2 (title, author, description, price, picture, location, createdAt, id_cat) VALUES ($title, $author, $description, $price, $picture, $location, $createdAt, $id_cat)",
-    //     {
-    //         $title: newAd.title,
-    //         $description: newAd.description,
-    //         $author: newAd.author,
-    //         $price: newAd.price,
-    //         $createdAt: newAd.createdAt,
-    //         $picture: newAd.picture,
-    //         $location: newAd.location,
-    //         $id_cat: newAd.id_cat,
-    //     },
-    //     function (this: any, err: any){
-    //         if(!err) return res.send({...newAd, id: this.lastID});
-    //         console.log(err);
-    //         res.sendStatus(500);
-    //         }
-    // ); 
-    // ads.push(newAd);
-    // res.send("Request received, check the backend terminal");
+    category.save();
+    res.send(category);
+  
 });
 
 app.put('/ads/:id', async (req: Request, res:Response) => {
@@ -92,11 +160,11 @@ app.put('/ads/:id', async (req: Request, res:Response) => {
     if (ad !== null) {
     ad.title = req.body.title;  
     ad.description = req.body.description;  
-    ad.author = req.body.author;  
+    // ad.author = req.body.author;  
     ad.price = req.body.price;  
     ad.createdAt = req.body.createdAt;  
     ad.location = req.body.location;  
-    ad.id_category = req.body.id_category; 
+    // ad.id_category = req.body.id_category; 
     ad.save();
     }
     res.send(ad);
@@ -105,108 +173,56 @@ app.put('/ads/:id', async (req: Request, res:Response) => {
 
 // DELETE AD
 
-app.delete('/delete/:id', async (req: Request, res: Response) => {
-    
-  const id = parseInt(req.params.id);
-  await Ad.delete({ id });
-  res.send('OK');
-  
-  
-  
-  
-  // db.get("SELECT * FROM ad2 WHERE id=?", [req.params.id], (err, row) => {
-    //     if(err){
-    //         console.log(err);
-    //         res.sendStatus(500);
-    //     };
-    // db.run("DELETE FROM ad2 where id=?", [req.params.id], (err: any) =>{
-    //     if(!err)return res.send(204);
-    
-
-    //     console.log(err);
-    //     res.sendStatus(500);
-    //  });
-    // });
-    
-    // const { id } = req.params;
-
-    // articles = articles.filter(article => article.id.toString() !== id);
-
-    // res.send(`Article with the id ${id} got deleted!`);
+app.delete("/ads/:id", async (req: Request, res: Response) => {
+  try {
+    const adToDelete = await Ad.findOneBy({ id: parseInt(req.params.id, 10) });
+    if (!adToDelete) return res.sendStatus(404);
+    await adToDelete.remove();
+    res.sendStatus(204);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
 });
 
 // GET AD BY ID
-
-app.get("/ads/:id", (req: Request, res: Response) => {
-    // db.get("SELECT * FROM ad2 WHERE id = ?", [req.params.id], (err, row) => {
-    //   if (err) {
-    //     console.log(err);
-    //     return res.sendStatus(500);
-    //   }
-    //   if (!row) return res.sendStatus(404);
-    //   res.send(row);
-    // });
-  });
+app.get("/ads/:id", async (req: Request, res: Response) => {
+  try {
+    const ad = await Ad.findOne({
+      where: { id: parseInt(req.params.id, 10) },
+      relations: { category: true, tags: true },
+    });
+    if (!ad) return res.sendStatus(404);
+    res.send(ad);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+});
 
 
 // modify existing article by id 
 
-app.patch('/ads/:id', (req: Request, res:Response) => {
-    
-    // db.get("SELECT * FROM ad WHERE id = ?"), [req.params.id], (err:any, row:any) => {
-    //     if (err) {
-    //       console.log(err);
-    //       return res.sendStatus(500);
-    //     }
-    //     if (!row) return res.sendStatus(404);
-
-    // creates a string with this shape : "title = $title, description = $description, ..."
-    // const setProps = Object.keys(req.body)
-    //   .reduce<string[]>((acc, prop) => [...acc, `${prop} = $${prop}`], [])
-    //   .join(", ");
-
-    // creates an object with this shape : {$title: "title sent by client", "$description: " description sent by client", ...}
-    // const propsToUpdate = Object.keys(req.body).reduce(
-    //   (acc, prop) => ({ ...acc, [`$${prop}`]: req.body[prop] }),
-    //   {}
-    // );
-
-    // db.run(
-    //     `UPDATE ad SET ${setProps} WHERE id = $id`,
-    //     { ...propsToUpdate, $id: req.params.id },
-    //     (err: any) => {
-    //       if (!err) return res.send({ ...row, ...req.body });
-    //       console.log(err);
-    //       res.sendStatus(500);
-    //     }
-    //   );
-    
-    
-    // console.log("id of the ad to update", req.params.id);
-
-    // console.log("props to update", req.body);
-    // const { id } = req.params;
-    // const {title, subtitle, intro} = req.body;
-
-    // const article = articles.find((article)=>article.id.toString() === id);
-    
-    // if(article){
-    //   if(title) article.title = title;  
-    //   if(subtitle) article.title = title;  
-    //   if(intro) article.title = title;  
-    // }
-    
-    // res.send(`article with the ${id} has been modified`);
-
-    });
-// });
+app.patch("/ads/:id", async (req: Request, res: Response) => {
+  try {
+    const adToUpdate = await Ad.findOneBy({ id: parseInt(req.params.id, 10) });
+    if (!adToUpdate) return res.sendStatus(404);
+    await Ad.merge(adToUpdate, req.body);
+    const errors = await validate(adToUpdate);
+    if (errors.length > 0) return res.status(422).send({ errors });
+    res.send(await adToUpdate.save());
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+});
 
 
 
 
 // app.listen(PORT, () => console.log(`Server running on port: http://localhost:${PORT}`));
 
-app.listen(4000, async () => {
+app.listen(PORT, async () => {
   await dataSource.initialize();
   console.log('Server launch on http://localhost:4000');
 });
