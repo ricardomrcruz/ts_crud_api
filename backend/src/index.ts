@@ -45,6 +45,8 @@ app.get("/", (req: Request, res: Response) => {
 
 app.get("/ads", async (req: Request, res: Response) => {
   const { tagIds, categoryId } = req.query;
+  const title = req.query.title as string | undefined;
+
   const tIds =
     typeof tagIds === "string" && tagIds.length > 0
       ? tagIds.split(",").map((t) => parseInt(t, 10))
@@ -65,10 +67,15 @@ app.get("/ads", async (req: Request, res: Response) => {
         tags: {
           id: tIds ? In(tIds) : undefined,
         },
+        title: title ? Like(`%${title}%`) : undefined,
         category: {
           id: catId,
         },
       },
+      order: {
+        createdAt: "desc",
+      },
+      take: 10,
     });
     res.send(ads);
   } catch (err) {
