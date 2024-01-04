@@ -1,16 +1,35 @@
 import "reflect-metadata";
-import express, {Request, Response} from 'express';
-import cors from 'cors';
+import { ApolloServer } from "@apollo/server";
+import { startStandaloneServer } from "@apollo/server/standalone";
+
+import express, { Request, Response } from "express";
+import cors from "cors";
 import { validate } from "class-validator";
-import sqlite3 from 'sqlite3';
-import  Ad  from './entities/Ad';
-import  Tag  from './entities/Tag';
-import  Category  from './entities/Category';
-import  dataSource  from "./config/db";
+import sqlite3 from "sqlite3";
+import Ad from "./entities/Ad";
+import Tag from "./entities/Tag";
+import Category from "./entities/Category";
+import dataSource from "./config/db";
 import { In, Like } from "typeorm";
 
+import { buildSchema } from "type-graphql";
+import TagResolver from "./resolvers/TagResolver";
+import AdResolver from "./resolvers/AdResolver";
 
-const db = new sqlite3.Database('the_good_corner.sqlite');
+
+
+buildSchema({ resolvers: [AdResolver, TagResolver] }).then((schema) => {
+  const server = new ApolloServer({ schema });
+  startStandaloneServer(server, {
+    listen: { port: 4001 },
+  }).then(({ url }) => {
+    console.log(`server ready on ${url}`);
+  });
+});
+
+
+
+
 
 const app = express();
 
@@ -18,28 +37,22 @@ app.use(cors());
 app.use(express.json());
 const PORT = 4000;
 
-app.use(express.json());
-
-// json object
-
 app.get("/", (req: Request, res: Response) => {
-    res.send("Hello World!");
-  
-  
-  });
+  res.send("Hello World!");
+});
 
-  app.get("/tags", async (req: Request, res: Response) => {
-    try {
-      const { name } = req.query;
-      const tags = await Tag.find({
-        where: { name: name ? Like(`%${name}%`) : undefined },
-      });
-      res.send(tags);
-    } catch (err) {
-      console.log(err);
-      res.sendStatus(500);
-    }
-  });
+app.get("/tags", async (req: Request, res: Response) => {
+  try {
+    const { name } = req.query;
+    const tags = await Tag.find({
+      where: { name: name ? Like(`%${name}%`) : undefined },
+    });
+    res.send(tags);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+});
 
 // get route all articles
 
@@ -100,7 +113,7 @@ app.get("/categories", async (req: Request, res: Response) => {
     res.sendStatus(500);
   }
 });
- 
+
 app.post("/categories", async (req: Request, res: Response) => {
   try {
     const newCategory = Category.create(req.body);
@@ -149,34 +162,30 @@ app.post("/ads", async (req: Request, res: Response) => {
   }
 });
 
-app.post('/addcategory', (req: Request, res: Response) => {
+app.post("/addcategory", (req: Request, res: Response) => {
+  const category = new Category();
+  // category.id_category = req.body.id_category;
+  category.name = req.body.name;
 
-    const category = new Category();
-    // category.id_category = req.body.id_category;
-    category.name = req.body.name;  
-    
-    category.save();
-    res.send(category);
-  
+  category.save();
+  res.send(category);
 });
 
-app.put('/ads/:id', async (req: Request, res:Response) => {
-    
-    const id = parseInt(req.params.id);
-    const ad = await Ad.findOneBy({id})
-    if (ad !== null) {
-    ad.title = req.body.title;  
-    ad.description = req.body.description;  
-    // ad.author = req.body.author;  
-    ad.price = req.body.price;  
-    ad.createdAt = req.body.createdAt;  
-    ad.location = req.body.location;  
-    // ad.id_category = req.body.id_category; 
+app.put("/ads/:id", async (req: Request, res: Response) => {
+  const id = parseInt(req.params.id);
+  const ad = await Ad.findOneBy({ id });
+  if (ad !== null) {
+    ad.title = req.body.title;
+    ad.description = req.body.description;
+    // ad.author = req.body.author;
+    ad.price = req.body.price;
+    ad.createdAt = req.body.createdAt;
+    ad.location = req.body.location;
+    // ad.id_category = req.body.id_category;
     ad.save();
-    }
-    res.send(ad);
-
-  });
+  }
+  res.send(ad);
+});
 
 // DELETE AD
 
@@ -207,8 +216,7 @@ app.get("/ads/:id", async (req: Request, res: Response) => {
   }
 });
 
-
-// modify existing article by id 
+// modify existing article by id
 
 app.patch("/ads/:id", async (req: Request, res: Response) => {
   try {
@@ -224,12 +232,9 @@ app.patch("/ads/:id", async (req: Request, res: Response) => {
   }
 });
 
-
-
-
 // app.listen(PORT, () => console.log(`Server running on port: http://localhost:${PORT}`));
 
 app.listen(PORT, async () => {
   await dataSource.initialize();
-  console.log('Server launch on http://localhost:4000');
+  console.log("Server launch on http://localhost:4000");
 });
